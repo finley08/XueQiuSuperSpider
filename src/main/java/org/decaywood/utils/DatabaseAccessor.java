@@ -18,33 +18,32 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class DatabaseAccessor {
 
-    public static class Holder {
-        public static final DatabaseAccessor ACCESSOR = new DatabaseAccessor();
-    }
-
     private String jdbcDriver = ""; // 数据库驱动
     private String dbUrl = ""; // 数据库 URL
     private String dbUsername = ""; // 数据库用户名
     private String dbPassword = ""; // 数据库用户密码
-    private int initialConnections = 10; // 连接池的初始大小
-    private int autoIncreaseStep = 5;// 连接池自增步进
+    private final int initialConnections = 10; // 连接池的初始大小
+    private final int autoIncreaseStep = 5;// 连接池自增步进
     private int maxConnections = 50; // 连接池最大的大小
     private List<PooledConnection> connections = null; // 存放连接池中数据库连接的向量 , 初始时为 null
+    /**
+     * 内部使用的用于保存连接池中连接对象的类
+     */
+    private final PooledConnection emptyPooledConn = new PooledConnection(null);
 
 
     public DatabaseAccessor() {
         this(
-                "com.mysql.jdbc.Driver",
-                "jdbc:mysql://localhost:3306/XueQiuSpider",
+                "com.mysql.cj.jdbc.Driver",
+                "jdbc:mysql://127.0.0.1:3307/xueqiuspider",
                 "root",
-                "123456"
+                "529155815"
         );
     }
 
 
-
     public DatabaseAccessor(String jdbcDriver, String dbUrl, String dbUsername,
-                          String dbPassword) {
+                            String dbPassword) {
 
         this.jdbcDriver = jdbcDriver;
         this.dbUrl = dbUrl;
@@ -60,7 +59,6 @@ public class DatabaseAccessor {
     }
 
 
-
     public synchronized void createPool() throws Exception {
 
         if (connections != null) return;
@@ -71,7 +69,6 @@ public class DatabaseAccessor {
         System.out.println(" 数据库连接池创建成功！ ");
 
     }
-
 
 
     public synchronized Connection getConnection() {
@@ -93,7 +90,6 @@ public class DatabaseAccessor {
     }
 
 
-
     public void returnConnection(Connection conn) {
 
         if (connections == null) {
@@ -108,7 +104,6 @@ public class DatabaseAccessor {
         connection.setBusy(false);
 
     }
-
 
 
     public synchronized void refreshConnections() throws SQLException {
@@ -164,7 +159,6 @@ public class DatabaseAccessor {
     }
 
 
-
     private Connection newConnection() throws SQLException {
 
         Connection conn = DriverManager.getConnection(dbUrl, dbUsername,
@@ -184,7 +178,6 @@ public class DatabaseAccessor {
         return conn;
 
     }
-
 
 
     private Connection getFreeConnection() throws Exception {
@@ -233,10 +226,9 @@ public class DatabaseAccessor {
 
     }
 
-    /**
-     * 内部使用的用于保存连接池中连接对象的类
-     */
-    private PooledConnection emptyPooledConn = new PooledConnection(null);
+    public static class Holder {
+        public static final DatabaseAccessor ACCESSOR = new DatabaseAccessor();
+    }
 
     class PooledConnection {
 
